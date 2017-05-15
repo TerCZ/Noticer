@@ -1,4 +1,8 @@
 # Created by .ignore support plugin (hsz.mobi)
+
+### customized filter
+*.graphml
+
 ### macOS template
 *.DS_Store
 .AppleDouble
