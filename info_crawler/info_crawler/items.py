@@ -8,7 +8,10 @@
 import scrapy
 
 
-class InfoCrawlerItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class Notification(scrapy.Item):
+    title = scrapy.Field()
+    date = scrapy.Field()
+    tag = scrapy.Field()
+
+    def process_item(self, item, spider):
+        print(self)
