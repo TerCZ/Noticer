@@ -88,3 +88,6 @@ ITEM_PIPELINES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# File that contains targets of the cralwer
+TARGET_CONFIG_FILENAME = "info_crawler/targets.json"

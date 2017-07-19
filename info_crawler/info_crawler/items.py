@@ -9,9 +9,9 @@ import scrapy
 
 
 class Notification(scrapy.Item):
-    title = scrapy.Field()
     date = scrapy.Field()
-    tag = scrapy.Field()
+    title = scrapy.Field()
+    target = scrapy.Field()
 
     def process_item(self, item, spider):
         print(self)
