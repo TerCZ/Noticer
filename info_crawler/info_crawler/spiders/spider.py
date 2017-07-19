@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import inspect
 import json
 import logging
 import scrapy
@@ -9,7 +10,8 @@ from info_crawler.items import Notification
 class InfoSpider(scrapy.Spider):
     name = 'spider'
     parser_target_mapping = {
-        "parse_seiee_xsb_scholarship": "电院学生办学生事务奖学金"
+        "parse_seiee_xsb_scholarship": "电院学生办学生事务奖学金",
+        "parse_seiee_xsb_subsidy": "电院学生办学生事务助学金"
     }
 
     @classmethod
@@ -59,28 +61,52 @@ class InfoSpider(scrapy.Spider):
 
     def start_requests(self):
         # start crawling
-        for parser_name, target_name in self.parser_target_mapping.items():
-            # make sure target is loaded
-            if target_name not in self.targets:
-                self.logger.warning("Unexpected target name: \"{}\"".format(target_name))
+        for parser_name in [parser_name for parser_name in dir(self) if parser_name.startswith('parse_')]:
+            target_name = self.parser_target_mapping.get(parser_name, None)
+            if target_name is None:
+                self.logger.warning("Cannot get mapping for parser: \"{}\", parser_target_mapping: \"{}\"".format(
+                    parser_name, self.parser_target_mapping))
                 continue
 
-            # assign target to proper parser
-            if parser_name == self.parse_seiee_xsb_scholarship.__name__:
-                # load target
-                target = self.get_target(self.parse_seiee_xsb_scholarship.__name__)
-                if target is None:
-                    continue
-
-                # issue request
-                yield scrapy.Request(url=target["url"], callback=self.parse_seiee_xsb_scholarship)
-            else:
-                self.logger.warning("Unexpected parser name: \"{}\"".format(parser_name))
+            target = self.get_target(parser_name)
+            if target is None:
                 continue
+
+            # issue request
+            parser = getattr(self, parser_name)
+            yield scrapy.Request(url=target["url"], callback=parser)
 
     def parse_seiee_xsb_scholarship(self, response):
         # load target
-        target = self.get_target(self.parse_seiee_xsb_scholarship.__name__)
+        target = self.get_target(inspect.stack()[0][3])
+        if target is None:
+            return
+        target_name = target.get("name", "Name field missing")
+
+        # get selectors
+        listSelector = target.get("listSelector", None)
+        dateSelector = target.get("dateSelector", None)
+        titleSelector = target.get("titleSelector", None)
+        if listSelector is None:
+            self.logger.error("Cannot get \"listSelector\" from target \"{}\"".format(target_name))
+            return
+        if dateSelector is None:
+            self.logger.error("Cannot get \"dateSelector\" from target \"{}\"".format(target_name))
+            return
+        if titleSelector is None:
+            self.logger.error("Cannot get \"titleSelector\" from target \"{}\"".format(target_name))
+            return
+
+        # actual parsing
+        for entry in response.css(listSelector):
+            date = entry.css(dateSelector).extract_first().replace("[", "").replace("]", "")
+            title = entry.css(titleSelector).extract_first()
+
+            yield Notification(date=date, title=title, target=target_name)
+
+    def parse_seiee_xsb_subsidy(self, response):
+        # load target
+        target = self.get_target(inspect.stack()[0][3])
         if target is None:
             return
         target_name = target.get("name", "Name field missing")

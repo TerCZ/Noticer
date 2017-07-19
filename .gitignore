@@ -124,3 +124,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+### test/temp files
+temp.json
