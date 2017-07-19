@@ -14,4 +14,4 @@ class Notification(scrapy.Item):
     target = scrapy.Field()
 
     def process_item(self, item, spider):
-        print(self)
+        pass
