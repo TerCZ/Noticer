@@ -9,9 +9,10 @@ import scrapy
 
 
 class Notification(scrapy.Item):
+    site_name = scrapy.Field()
     date = scrapy.Field()
     title = scrapy.Field()
-    target = scrapy.Field()
 
-    def process_item(self, item, spider):
-        pass
+
+class NotificationWithContent(Notification):
+    content = scrapy.Field()
