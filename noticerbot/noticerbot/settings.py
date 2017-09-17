@@ -90,7 +90,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # Logging
-LOG_LEVEL = "WARNING"
+LOG_LEVEL = "INFO"
 
 # MySQL settings
 MYSQL_HOST = "localhost"

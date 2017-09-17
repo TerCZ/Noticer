@@ -25,7 +25,7 @@ class MysqlPipeline(object):
 
     def open_spider(self, spider):
         self.conn = pymysql.connect(host=self.mysql_host, user=self.mysql_user,
-                                    password=self.mysql_pwd, db=self.mysql_db, charset='utf8mb4')
+                                    password=self.mysql_pwd, db=self.mysql_db, charset="utf8mb4")
 
         # fetch site_name - site_id mapping
         cursor = self.conn.cursor()
@@ -39,12 +39,17 @@ class MysqlPipeline(object):
         self.conn.close()
 
     def process_item(self, item, spider):
-        sql = "INSERT INTO {} (title, preview, notice_date, site_id) VALUES (%s, %s, %s, %s)".format(self.notice_table)
         cursor = self.conn.cursor()
-        if item["site_name"] in self.sites:
-            cursor.execute(sql, (item["title"], item["preview"], item["date"], self.sites[item["site_name"]]))
-        else:
-            self.logger.error("Fail to map site id for \"{}\", using table \"{}\"".format(
-                item["site_name"], self.site_table))
+
+        # avoid duplicate
+        cursor.execute("SELECT count(*) FROM Notice WHERE title = %s AND notice_date = %s", (item["title"], item["date"]))
+        if cursor.fetchone()[0] == 0:
+            sql = "INSERT INTO {} (title, preview, notice_date, site_id) VALUES (%s, %s, %s, %s)".format(
+                self.notice_table)
+            if item["site_name"] in self.sites:
+                cursor.execute(sql, (item["title"], item["preview"], item["date"], self.sites[item["site_name"]]))
+            else:
+                self.logger.error("Fail to map site id for \"{}\", using table \"{}\"".format(
+                    item["site_name"], self.site_table))
 
         return item
