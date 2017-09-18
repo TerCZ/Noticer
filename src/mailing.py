@@ -1,25 +1,40 @@
 import configparser
+import logging
 import os
 import pymysql.cursors
 import smtplib
 
+from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
-config = configparser.ConfigParser()
-config.read("../config")
-db_config = config["Database"]
-mysql_host = db_config["MYSQL_HOST"]
-mysql_db = db_config["MYSQL_DB"]
-mysql_user = db_config["MYSQL_USER"]
-mysql_pwd = db_config["MYSQL_PWD"]
-site_table = db_config["SITE_TABLE"]
-notice_table = db_config["NOTICE_TABLE"]
+# Database
+CONFIG = configparser.ConfigParser()
+CONFIG.read("../config")
+MYSQL_HOST = CONFIG["Database"]["MYSQL_HOST"]
+MYSQL_DB = CONFIG["Database"]["MYSQL_DB"]
+MYSQL_USER = CONFIG["Database"]["MYSQL_USER"]
+MYSQL_PWD = CONFIG["Database"]["MYSQL_PWD"]
+SITE_TABLE = CONFIG["Database"]["SITE_TABLE"]
+NOTICE_TABLE = CONFIG["Database"]["NOTICE_TABLE"]
 
-conn = pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_pwd, db=mysql_db, charset="utf8mb4")
-cursor = conn.cursor()
+CONN = pymysql.connect(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PWD, db=MYSQL_DB, charset="utf8mb4")
+CURSOR = CONN.cursor()
 
-env = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(__file__))), trim_blocks=True, autoescape=select_autoescape(['html', 'xml']))
+# Jinja2 tamplating
+JINJA_ENV = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(__file__))),
+                        trim_blocks=True, autoescape=select_autoescape(["html", "xml"]))
+
+# Gmail SMTP
+SENDER_ADDR = "noticer.sjtu@gmail.com"
+SMTP_SERVER = smtplib.SMTP("smtp.gmail.com", 587)
+SMTP_SERVER.ehlo()
+SMTP_SERVER.starttls()
+SMTP_SERVER.login(SENDER_ADDR, "nTH-5D2-V23-LnP")
+
+# Logger
+LOGGER = logging.getLogger('Mailing.py')
+
 
 def fetch_content(user_id):
     content = {}
@@ -33,9 +48,9 @@ def fetch_content(user_id):
               JOIN Site USING (site_id)
               JOIN School USING (school_id)
             WHERE user_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval"""
-    cursor.execute(sql, (user_id,))
+    CURSOR.execute(sql, (user_id,))
 
-    for school_entry in cursor.fetchall():
+    for school_entry in CURSOR.fetchall():
         school_id, school_name = school_entry
         content[school_name] = {}
         # fetch site that notices to be sent belong to
@@ -47,9 +62,9 @@ def fetch_content(user_id):
                   JOIN Site USING (site_id)
                   JOIN School USING (school_id)
                 WHERE user_id = %s AND school_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval"""
-        cursor.execute(sql, (user_id, school_id))
+        CURSOR.execute(sql, (user_id, school_id))
 
-        for site_entry in cursor.fetchall():
+        for site_entry in CURSOR.fetchall():
             site_id, site_name = site_entry
             # fetch notices
             sql = """SELECT
@@ -64,54 +79,46 @@ def fetch_content(user_id):
                       JOIN School USING (school_id)
                     WHERE user_id = %s AND school_id = %s AND site_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval
                     ORDER BY ago ASC;"""
-            cursor.execute(sql, (user_id, school_id, site_id))
+            CURSOR.execute(sql, (user_id, school_id, site_id))
 
-            content[school_name][site_name] = cursor.fetchall()
+            content[school_name][site_name] = CURSOR.fetchall()
 
     return content
 
 
-def format_content(content):
-    template = env.get_template("to_subsciber.j2")
-    # print(template.render(content=content))
-    f = open("preview.html", "w")
-    f.write(template.render(content=content))
-    f.close()
+def format_content(content, sending_interval):
+    template = JINJA_ENV.get_template("to_subsciber.j2")
+    return template.render(content=content, sending_interval=sending_interval)
 
 
-def send_email(address, message):
-    TO = 't.chuzhe@qq.com'
-    SUBJECT = 'TEST MAIL'
-    TEXT = 'Here is a message from python.'
-
-    # Gmail Sign In
-    gmail_sender = 'noticer.sjtu@gmail.com'
-    gmail_passwd = 'nTH-5D2-V23-LnP'
-
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-    server.starttls()
-    server.login(gmail_sender, gmail_passwd)
-
-    BODY = '\r\n'.join(['To: %s' % TO,
-                        'From: %s' % gmail_sender,
-                        'Subject: %s' % SUBJECT,
-                        '', TEXT])
+def send_email(receiver_addr, html):
+    message = MIMEText(html, "html")
+    message["From"] = "SJTU Noticer <{}>".format(SENDER_ADDR)
+    message["To"] = "<{}>".format(receiver_addr)
+    message["Subject"] = "来自SJTU Noticer的校园信息订阅"
 
     try:
-        server.sendmail(gmail_sender, [TO], BODY)
-        print('email sent')
+        SMTP_SERVER.sendmail(SENDER_ADDR, [receiver_addr], message.as_string())
+        LOGGER.info("Successfully send to \"{}\"".format(receiver_addr))
     except:
-        print('error sending mail')
-
-    server.quit()
+        print("error sending mail")
 
 
-# fetch all subscribers
-cursor.execute("SELECT user_id, email FROM User JOIN UserRole USING (user_id) JOIN Role USING (role_id) WHERE role_name = \"subscriber\"")
-users = cursor.fetchall()
+def main():
+    # fetch all subscribers
+    CURSOR.execute(
+        "SELECT user_id, email, sending_interval FROM User JOIN UserRole USING (user_id) JOIN Role USING (role_id) WHERE role_name = \"subscriber\"")
+    users = CURSOR.fetchall()
 
-for user in users:
-    user_id, email = user
-    content = fetch_content(user_id)
-    format_content(content)
+    # deal them one by one
+    for user in users:
+        user_id, email, sending_interval = user
+        content = fetch_content(user_id)
+        html = format_content(content, sending_interval)
+        send_email(email, html)
+
+    SMTP_SERVER.quit()
+
+
+if __name__ == '__main__':
+    main()

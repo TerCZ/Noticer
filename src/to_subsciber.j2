@@ -3,18 +3,16 @@
     <div class="row justify-content-md-center">
         <div class="col col-md-8">
             <h1>SJTU Noticer</h1>
-            <p>这是您订阅的校园信息源最近3天的更新。</p>
+            <p>这是您订阅的校园信息源最近{{ sending_interval }}天的更新。</p>
             <br/>
             {% for school_name, sites in content.items() %}
-                <h2 class="display-4">{{ school_name }}</h2>
+                <h3>{{ school_name }}</h3>
                 <hr/>
                 {% for site_name, entries in sites.items() %}
-                    <h3>{{ site_name }}</h3>
+                    <h4>{{ site_name }}</h4>
                     <br/>
                     {% for entry in entries %}
-                        <h5>{{ entry[0] }}
-                            <small class="text-muted">{{ entry[3] }}天前</small>
-                        </h5>
+                        <p><strong>{{ entry[0] }}</strong> <span class="text-muted">{{ entry[3]|string + "天前" if entry[3] > 0 else "今天" }}</span></p>
                         <p class="text-dark">{{ entry[1][:100] if entry[1].rfind("。") < 0 else entry[1][:entry[1].rfind("。") + 1] }}... <a href="{{ entry[2] }}">查看详情</a></p>
                         <br/>
                     {% endfor %}
