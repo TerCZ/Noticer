@@ -123,9 +123,10 @@ def send_mails():
     for user in users:
         user_id, email, sending_interval = user
         content = fetch_content(user_id)
-        html = format_content(content, sending_interval)
-        # if send_email(email, html):
-        #     CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
+        if content:  # only send email if there are new notice
+            html = format_content(content, sending_interval)
+            # if send_email(email, html):
+            #     CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
 
     CONN.commit()
     SMTP_SERVER.quit()
