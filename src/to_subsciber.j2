@@ -12,7 +12,7 @@
                     <br/>
                     {% for entry in entries %}
                         <p><strong>{{ entry[0] }}</strong> <span class="text-muted">{{ entry[3]|string + "天前" if entry[3] > 0 else "今天" }}</span></p>
-                        <p class="text-dark">{{ entry[1][:100] if entry[1].rfind("。") < 0 else entry[1][:entry[1].rfind("。") + 1] }}... <a href="{{ entry[2] }}">查看详情</a></p>
+                        <p class="text-dark">{{ entry[1][:100] if entry[1].rfind("。") < 0 else entry[1][:entry[1].rfind("。") + 1] }} <a href="{{ entry[2] }}">...查看详情</a></p>
                         <br/>
                     {% endfor %}
                 {% endfor %}
