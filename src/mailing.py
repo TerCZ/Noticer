@@ -48,7 +48,7 @@ def fetch_content(user_id):
               JOIN Notice USING (site_id)
               JOIN Site USING (site_id)
               JOIN School USING (school_id)
-            WHERE user_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval"""
+            WHERE user_id = %s AND timestampdiff(DAY, notice_date, now()) <= sending_interval"""
     CURSOR.execute(sql, (user_id,))
 
     for school_entry in CURSOR.fetchall():
@@ -62,7 +62,7 @@ def fetch_content(user_id):
                   JOIN Notice USING (site_id)
                   JOIN Site USING (site_id)
                   JOIN School USING (school_id)
-                WHERE user_id = %s AND school_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval"""
+                WHERE user_id = %s AND school_id = %s AND timestampdiff(DAY, notice_date, now()) <= sending_interval"""
         CURSOR.execute(sql, (user_id, school_id))
 
         for site_entry in CURSOR.fetchall():
@@ -78,7 +78,7 @@ def fetch_content(user_id):
                       JOIN Notice USING (site_id)
                       JOIN Site USING (site_id)
                       JOIN School USING (school_id)
-                    WHERE user_id = %s AND school_id = %s AND site_id = %s AND timestampdiff(DAY, notice_date, now()) < sending_interval
+                    WHERE user_id = %s AND school_id = %s AND site_id = %s AND timestampdiff(DAY, notice_date, now()) <= sending_interval
                     ORDER BY ago ASC;"""
             CURSOR.execute(sql, (user_id, school_id, site_id))
 
@@ -101,14 +101,22 @@ def send_email(receiver_addr, html):
     try:
         SMTP_SERVER.sendmail(SENDER_ADDR, [receiver_addr], message.as_string())
         logging.info("Successfully send to \"{}\"".format(receiver_addr))
+        return True
     except Exception as e:
         logging.error("Error sending to \"{}\", {}".format(receiver_addr, e))
+        return False
 
 
 def send_mails():
     # fetch all subscribers
-    CURSOR.execute(
-        "SELECT user_id, email, sending_interval FROM User JOIN UserRole USING (user_id) JOIN Role USING (role_id) WHERE role_name = \"subscriber\"")
+    sql = """SELECT
+              user_id,
+              email
+            FROM User
+              JOIN UserRole USING (user_id)
+              JOIN Role USING (role_id)
+            WHERE role_name = "subscriber" AND timestampdiff(DAY, recent_sent, now()) >= sending_interval"""
+    CURSOR.execute(sql)
     users = CURSOR.fetchall()
 
     # deal them one by one
@@ -116,8 +124,10 @@ def send_mails():
         user_id, email, sending_interval = user
         content = fetch_content(user_id)
         html = format_content(content, sending_interval)
-        send_email(email, html)
+        # if send_email(email, html):
+        #     CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
 
+    CONN.commit()
     SMTP_SERVER.quit()
 
 

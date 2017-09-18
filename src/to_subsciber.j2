@@ -2,8 +2,7 @@
 <div class="container">
     <div class="row justify-content-md-center">
         <div class="col col-md-8">
-            <h1>SJTU Noticer</h1>
-            <p>这是您订阅的校园信息源最近{{ sending_interval }}天的更新。</p>
+            <p>这是您通过SJTU Noticer订阅的最近{{ sending_interval }}天的校园信息更新。</p>
             <br/>
             {% for school_name, sites in content.items() %}
                 <h3>{{ school_name }}</h3>
