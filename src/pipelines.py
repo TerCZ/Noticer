@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import configparser
 import logging
+import os
 import pymysql.cursors
 
 
@@ -9,7 +10,7 @@ class MysqlPipeline(object):
     def __init__(self):
         # read database config
         config = configparser.ConfigParser()
-        config.read("config")
+        config.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
         self.mysql_host = config["Database"]["MYSQL_HOST"]
         self.mysql_db = config["Database"]["MYSQL_DB"]
         self.mysql_user = config["Database"]["MYSQL_USER"]

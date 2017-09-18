@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # Database
 CONFIG = configparser.ConfigParser()
-CONFIG.read("config")
+CONFIG.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
 MYSQL_HOST = CONFIG["Database"]["MYSQL_HOST"]
 MYSQL_DB = CONFIG["Database"]["MYSQL_DB"]
 MYSQL_USER = CONFIG["Database"]["MYSQL_USER"]

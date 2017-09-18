@@ -2,6 +2,7 @@ import configparser
 import inspect
 import json
 import logging
+import os
 import pymysql.cursors
 import scrapy
 
@@ -11,7 +12,7 @@ from scrapy.crawler import CrawlerProcess
 
 
 CONFIG = configparser.ConfigParser()
-CONFIG.read("config")
+CONFIG.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
 
 
 
