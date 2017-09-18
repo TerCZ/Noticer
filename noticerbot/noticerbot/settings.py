@@ -91,6 +91,7 @@ ITEM_PIPELINES = {
 
 # Logging
 LOG_LEVEL = "INFO"
+LOG_FILE = "scrapy_log"
 
 # MySQL settings
 MYSQL_HOST = "localhost"
