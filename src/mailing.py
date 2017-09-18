@@ -111,7 +111,8 @@ def send_mails():
     # fetch all subscribers
     sql = """SELECT
               user_id,
-              email
+              email,
+              sending_interval
             FROM User
               JOIN UserRole USING (user_id)
               JOIN Role USING (role_id)
