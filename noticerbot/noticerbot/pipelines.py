@@ -44,10 +44,10 @@ class MysqlPipeline(object):
         # avoid duplicate
         cursor.execute("SELECT count(*) FROM Notice WHERE title = %s AND notice_date = %s", (item["title"], item["date"]))
         if cursor.fetchone()[0] == 0:
-            sql = "INSERT INTO {} (title, preview, notice_date, site_id) VALUES (%s, %s, %s, %s)".format(
+            sql = "INSERT INTO {} (title, preview, url, notice_date, site_id) VALUES (%s, %s, %s, %s, %s)".format(
                 self.notice_table)
             if item["site_name"] in self.sites:
-                cursor.execute(sql, (item["title"], item["preview"], item["date"], self.sites[item["site_name"]]))
+                cursor.execute(sql, (item["title"], item["preview"], item["url"], item["date"], self.sites[item["site_name"]]))
             else:
                 self.logger.error("Fail to map site id for \"{}\", using table \"{}\"".format(
                     item["site_name"], self.site_table))

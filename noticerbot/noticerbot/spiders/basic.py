@@ -60,13 +60,15 @@ class BasicSpider(scrapy.Spider):
             else:
                 # some index page does not show date
                 if response.meta["site_name"] not in ("电院学生办职业发展校园宣讲会"):
-                    self.logger.warning("Fail to extract date from \"{}\" in entry \"{}\"".format(response.url, entry.extract()))
+                    self.logger.warning("Fail to extract date from \"{}\" in entry \"{}\"".format(
+                        response.url, entry.extract()))
 
             content_href = entry.css("a::attr(href)").extract_first()
             if content_href is None:
-                self.logger.warning("Fail to extract content page href from \"{}\" in entry \"{}\"".format(response.url, entry.extract()))
+                self.logger.warning("Fail to extract content page href from \"{}\" in entry \"{}\"".format(
+                    response.url, entry.extract()))
                 continue
-            
+
             url = response.urljoin(content_href)
             request = scrapy.Request(url=url, callback=self.parse_seiee_xsb_content)
             request.meta["site_name"] = response.meta["site_name"]
@@ -107,4 +109,4 @@ class BasicSpider(scrapy.Spider):
         # get pure content
         content = soup.get_text(strip=True)
 
-        yield Notice(site_name=response.meta["site_name"], title=title, preview=content[:255], date=date)
+        yield Notice(site_name=response.meta["site_name"], title=title, preview=content[:255], url=response.url, date=date)

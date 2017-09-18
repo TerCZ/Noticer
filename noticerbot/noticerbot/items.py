@@ -12,4 +12,5 @@ class Notice(scrapy.Item):
     site_name = scrapy.Field()
     title = scrapy.Field()
     preview = scrapy.Field()
+    url =  scrapy.Field()
     date = scrapy.Field()
