@@ -1,24 +1,22 @@
 # -*- coding: utf-8 -*-
+import configparser
 import logging
 import pymysql.cursors
 
 
 class MysqlPipeline(object):
 
-    @classmethod
-    def from_crawler(cls, crawler):
-        return cls(mysql_host=crawler.settings.get("MYSQL_HOST"), mysql_db=crawler.settings.get("MYSQL_DB"),
-                   mysql_user=crawler.settings.get("MYSQL_USER"), mysql_pwd=crawler.settings.get("MYSQL_PWD"),
-                   site_table=crawler.settings.get("SITE_TABLE"), notice_table=crawler.settings.get("NOTICE_TABLE"))
-
-    def __init__(self, mysql_host, mysql_db, mysql_user, mysql_pwd, site_table, notice_table):
-        # save database data
-        self.mysql_host = mysql_host
-        self.mysql_db = mysql_db
-        self.mysql_user = mysql_user
-        self.mysql_pwd = mysql_pwd
-        self.site_table = site_table
-        self.notice_table = notice_table
+    def __init__(self):
+        # read database config
+        config = configparser.ConfigParser()
+        config.read("../config")
+        db_config = config["Database"]
+        self.mysql_host = db_config["MYSQL_HOST"]
+        self.mysql_db = db_config["MYSQL_DB"]
+        self.mysql_user = db_config["MYSQL_USER"]
+        self.mysql_pwd = db_config["MYSQL_PWD"]
+        self.site_table = db_config["SITE_TABLE"]
+        self.notice_table = db_config["NOTICE_TABLE"]
 
         # get a logger
         self.logger = logging.getLogger('MysqlPipeline')

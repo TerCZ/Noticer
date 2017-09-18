@@ -1,0 +1,10 @@
+[Database]
+# MySQL settings
+MYSQL_HOST = localhost
+MYSQL_DB = Noticer
+MYSQL_USER = noticer
+MYSQL_PWD = 0000
+
+# Database metadata
+SITE_TABLE = Site
+NOTICE_TABLE = Notice

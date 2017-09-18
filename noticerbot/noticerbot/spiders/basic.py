@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import configparser
 import inspect
 import json
 import logging
@@ -31,7 +32,11 @@ class BasicSpider(scrapy.Spider):
             ("电院学生办职业发展历届毕业生去向", self.parse_seiee_xsb_index)
         ]
 
-        site_table = self.crawler.settings.get("SITE_TABLE")
+        # read site table name from config
+        config = configparser.ConfigParser()
+        config.read("../config")
+        db_config = config["Database"]
+        site_table = db_config["SITE_TABLE"]
 
         # fetch site_name - url mapping
         conn = pymysql.connect(host='localhost', user='noticer', password='0000', db='Noticer', charset='utf8mb4')
