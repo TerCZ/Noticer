@@ -100,9 +100,9 @@ def send_email(receiver_addr, html):
 
     try:
         SMTP_SERVER.sendmail(SENDER_ADDR, [receiver_addr], message.as_string())
-        LOGGER.info("Successfully send to \"{}\"".format(receiver_addr))
-    except:
-        print("error sending mail")
+        logging.info("Successfully send to \"{}\"".format(receiver_addr))
+    except Exception as e:
+        logging.error("Error sending to \"{}\", {}".format(receiver_addr, e))
 
 
 def send_mails():
