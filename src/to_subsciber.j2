@@ -1,0 +1,25 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col col-md-8">
+            <h1>SJTU Noticer</h1>
+            <p>这是您订阅的校园信息源最近3天的更新。</p>
+            <br/>
+            {% for school_name, sites in content.items() %}
+                <h2 class="display-4">{{ school_name }}</h2>
+                <hr/>
+                {% for site_name, entries in sites.items() %}
+                    <h3>{{ site_name }}</h3>
+                    <br/>
+                    {% for entry in entries %}
+                        <h5>{{ entry[0] }}
+                            <small class="text-muted">{{ entry[3] }}天前</small>
+                        </h5>
+                        <p class="text-dark">{{ entry[1][:100] if entry[1].rfind("。") < 0 else entry[1][:entry[1].rfind("。") + 1] }}... <a href="{{ entry[2] }}">查看详情</a></p>
+                        <br/>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

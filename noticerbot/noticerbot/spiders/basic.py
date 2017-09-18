@@ -114,4 +114,4 @@ class BasicSpider(scrapy.Spider):
         # get pure content
         content = soup.get_text(strip=True)
 
-        yield Notice(site_name=response.meta["site_name"], title=title, preview=content[:255], url=response.url, date=date)
+        yield Notice(site_name=response.meta["site_name"], title=title, preview=content[:120], url=response.url, date=date)
