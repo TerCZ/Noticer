@@ -9,3 +9,5 @@ SJTU Noticer是一个定期爬去校园咨询并向订阅者发送邮件通知�
 创建对Noticer拥有ALL Privilege的用户noticer。
 `GRANT ALL ON Noticer.* TO 'noticer'@'localhost';`
 在src/config里修改相应参数。
+### Python 3及依赖
+`sudo pip3 install PyMySQL, Scrappy, beautifulsoup4, Jinjia2`
