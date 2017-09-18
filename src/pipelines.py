@@ -8,9 +8,10 @@ import pymysql.cursors
 class MysqlPipeline(object):
 
     def __init__(self):
-        # read database config
         config = configparser.ConfigParser()
         config.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
+
+        # read database config
         self.mysql_host = config["Database"]["MYSQL_HOST"]
         self.mysql_db = config["Database"]["MYSQL_DB"]
         self.mysql_user = config["Database"]["MYSQL_USER"]
@@ -19,15 +20,11 @@ class MysqlPipeline(object):
         self.notice_table = config["Database"]["NOTICE_TABLE"]
 
         # read logging config
-        log_file = config["Logging"]["LOG_FILE"]
+        log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + config["Logging"]["LOG_FILE"]
+        # log_file = config["Logging"]["LOG_FILE"]
         log_level = config["Logging"]["LOG_LEVEL"]
-
         logging.basicConfig(filename=log_file, level=log_level)
 
-        # get a logger
-        # self.logger = logging.getLogger('MysqlPipeline')
-        # self.logger.setLevel(log_level)
-        # self.logger.basicConfig(filename=log_file,level=logging.DEBUG)
 
     def open_spider(self, spider):
         self.conn = pymysql.connect(host=self.mysql_host, user=self.mysql_user,

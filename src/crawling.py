@@ -15,7 +15,6 @@ CONFIG = configparser.ConfigParser()
 CONFIG.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
 
 
-
 class Notice(scrapy.Item):
     site_name = scrapy.Field()
     title = scrapy.Field()
@@ -178,6 +177,10 @@ class MysqlPipeline(object):
 
 
 def run_spider():
+    log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + CONFIG["Logging"]["LOG_FILE"]
+    # log_file = CONFIG["Logging"]["LOG_FILE"]
+    log_level = CONFIG["Logging"]["LOG_LEVEL"]
+
     process = CrawlerProcess({
         'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)',
         "BOT_NAME": 'noticerbot',
@@ -185,8 +188,8 @@ def run_spider():
         "ITEM_PIPELINES": {
             'pipelines.MysqlPipeline': 300
         },
-        "LOG_LEVEL": "INFO",
-        "LOG_FILE": "scrapy_log"
+        "LOG_LEVEL": log_level,
+        "LOG_FILE": log_file
     })
 
     process.crawl(BasicSpider)

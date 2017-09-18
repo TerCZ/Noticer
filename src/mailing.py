@@ -8,9 +8,11 @@ from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
-# Database
+# project config
 CONFIG = configparser.ConfigParser()
 CONFIG.read(os.path.dirname(os.path.realpath(__file__)) + "/config")
+
+# Database
 MYSQL_HOST = CONFIG["Database"]["MYSQL_HOST"]
 MYSQL_DB = CONFIG["Database"]["MYSQL_DB"]
 MYSQL_USER = CONFIG["Database"]["MYSQL_USER"]
@@ -22,7 +24,10 @@ CONN = pymysql.connect(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PWD, db=
 CURSOR = CONN.cursor()
 
 # Logging
-logging.basicConfig(filename=CONFIG["Logging"]["LOG_FILE"], level=CONFIG["Logging"]["LOG_LEVEL"])
+log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + CONFIG["Logging"]["LOG_FILE"]
+# log_file = CONFIG["Logging"]["LOG_FILE"]
+log_level = CONFIG["Logging"]["LOG_LEVEL"]
+logging.basicConfig(filename=log_file, level=log_level)
 
 # Jinja2 tamplating
 JINJA_ENV = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(__file__))),
@@ -126,8 +131,9 @@ def send_mails():
         content = fetch_content(user_id)
         if content:  # only send email if there are new notice
             html = format_content(content, sending_interval)
-            # if send_email(email, html):
-            #     CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
+            if send_email(email, html):
+                # CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
+                pass
 
     CONN.commit()
     SMTP_SERVER.quit()
