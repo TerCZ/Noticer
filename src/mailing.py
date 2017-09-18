@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # Database
 CONFIG = configparser.ConfigParser()
-CONFIG.read("../config")
+CONFIG.read("config")
 MYSQL_HOST = CONFIG["Database"]["MYSQL_HOST"]
 MYSQL_DB = CONFIG["Database"]["MYSQL_DB"]
 MYSQL_USER = CONFIG["Database"]["MYSQL_USER"]
@@ -20,6 +20,9 @@ NOTICE_TABLE = CONFIG["Database"]["NOTICE_TABLE"]
 
 CONN = pymysql.connect(host=MYSQL_HOST, user=MYSQL_USER, password=MYSQL_PWD, db=MYSQL_DB, charset="utf8mb4")
 CURSOR = CONN.cursor()
+
+# Logging
+logging.basicConfig(filename=CONFIG["Logging"]["LOG_FILE"], level=CONFIG["Logging"]["LOG_LEVEL"])
 
 # Jinja2 tamplating
 JINJA_ENV = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(__file__))),
@@ -32,8 +35,6 @@ SMTP_SERVER.ehlo()
 SMTP_SERVER.starttls()
 SMTP_SERVER.login(SENDER_ADDR, "nTH-5D2-V23-LnP")
 
-# Logger
-LOGGER = logging.getLogger('Mailing.py')
 
 
 def fetch_content(user_id):
@@ -104,7 +105,7 @@ def send_email(receiver_addr, html):
         print("error sending mail")
 
 
-def main():
+def send_mails():
     # fetch all subscribers
     CURSOR.execute(
         "SELECT user_id, email, sending_interval FROM User JOIN UserRole USING (user_id) JOIN Role USING (role_id) WHERE role_name = \"subscriber\"")
@@ -121,4 +122,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    send_mails()
