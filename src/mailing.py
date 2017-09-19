@@ -119,9 +119,7 @@ def send_mails():
               email,
               sending_interval
             FROM User
-              JOIN UserRole USING (user_id)
-              JOIN Role USING (role_id)
-            WHERE role_name = "subscriber" AND timestampdiff(DAY, recent_sent, now()) >= sending_interval"""
+            WHERE activated AND timestampdiff(DAY, recent_sent, now()) >= sending_interval"""
     CURSOR.execute(sql)
     users = CURSOR.fetchall()
 
@@ -131,9 +129,9 @@ def send_mails():
         content = fetch_content(user_id)
         if content:  # only send email if there are new notice
             html = format_content(content, sending_interval)
-            if send_email(email, html):
-                # CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
-                pass
+            if send_email(email, html) and user_id != 1:
+                CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
+
 
     CONN.commit()
     SMTP_SERVER.quit()
