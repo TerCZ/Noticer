@@ -25,7 +25,6 @@ CURSOR = CONN.cursor()
 
 # Logging
 log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + CONFIG["Logging"]["LOG_FILE"]
-# log_file = CONFIG["Logging"]["LOG_FILE"]
 log_level = CONFIG["Logging"]["LOG_LEVEL"]
 logging.basicConfig(filename=log_file, level=log_level)
 
@@ -35,10 +34,14 @@ JINJA_ENV = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(
 
 # Gmail SMTP
 SENDER_ADDR = "noticer.sjtu@gmail.com"
-SMTP_SERVER = smtplib.SMTP("smtp.gmail.com", 587)
-SMTP_SERVER.ehlo()
-SMTP_SERVER.starttls()
-SMTP_SERVER.login(SENDER_ADDR, "nTH-5D2-V23-LnP")
+try:
+    SMTP_SERVER = smtplib.SMTP("smtp.gmail.com", 587)
+    SMTP_SERVER.ehlo()
+    SMTP_SERVER.starttls()
+    SMTP_SERVER.login(SENDER_ADDR, "nTH-5D2-V23-LnP")
+except OSError as e:
+    logging.error(e)
+    raise e
 
 
 

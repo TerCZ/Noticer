@@ -21,7 +21,6 @@ class MysqlPipeline(object):
 
         # read logging config
         log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + config["Logging"]["LOG_FILE"]
-        # log_file = config["Logging"]["LOG_FILE"]
         log_level = config["Logging"]["LOG_LEVEL"]
         logging.basicConfig(filename=log_file, level=log_level)
 

@@ -178,7 +178,6 @@ class MysqlPipeline(object):
 
 def run_spider():
     log_file = os.path.dirname(os.path.realpath(__file__)) + "/" + CONFIG["Logging"]["LOG_FILE"]
-    # log_file = CONFIG["Logging"]["LOG_FILE"]
     log_level = CONFIG["Logging"]["LOG_LEVEL"]
 
     process = CrawlerProcess({
