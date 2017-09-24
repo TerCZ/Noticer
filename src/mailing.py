@@ -3,6 +3,7 @@ import logging
 import os
 import pymysql.cursors
 import smtplib
+import sys
 
 from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -115,6 +116,22 @@ def send_email(receiver_addr, html):
         return False
 
 
+# only send to mysql
+def send_mails_test():
+    # fetch all subscribers
+    sql = "SELECT user_id, email, sending_interval FROM User WHERE user_id = 1"
+    CURSOR.execute(sql)
+    users = CURSOR.fetchall()
+
+    # deal them one by one
+    for user in users:
+        user_id, email, sending_interval = user
+        content = fetch_content(user_id)
+        if content:  # only send email if there are new notice
+            html = format_content(content, sending_interval)
+            send_email(email, html)
+
+
 def send_mails():
     # fetch all subscribers
     sql = """SELECT
@@ -132,7 +149,7 @@ def send_mails():
         content = fetch_content(user_id)
         if content:  # only send email if there are new notice
             html = format_content(content, sending_interval)
-            if send_email(email, html) and user_id != 1:
+            if send_email(email, html):
                 CURSOR.execute("UPDATE User SET recent_sent = current_date() WHERE user_id = %s", (user_id,))
 
 
@@ -141,4 +158,7 @@ def send_mails():
 
 
 if __name__ == '__main__':
-    send_mails()
+    if len(sys.argv) > 1:
+        send_mails_test()
+    else:
+        send_mails()
