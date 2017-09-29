@@ -82,8 +82,8 @@ class BasicSpider(scrapy.Spider):
             date = entry.css("span::text").extract_first()
             if date is not None:
                 date = datetime.strptime(date, "[%Y-%m-%d]")
-                if datetime.today() - date > timedelta(days=60):
-                    # only visit notice that are posted within 3 days
+                if datetime.today() - date > timedelta(days=2):
+                    # only visit notice that are posted within 2 days
                     continue
             else:
                 # some index page does not show date
