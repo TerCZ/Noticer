@@ -46,7 +46,8 @@ class BasicSpider(scrapy.Spider):
             ("电院学生办职业发展实习生招聘", self.parse_seiee_xsb_index),
             ("电院学生办职业发展博士生招聘", self.parse_seiee_xsb_index),
             ("电院学生办职业发展生涯故事分享", self.parse_seiee_xsb_index),
-            ("电院学生办职业发展历届毕业生去向", self.parse_seiee_xsb_index)
+            ("电院学生办职业发展历届毕业生去向", self.parse_seiee_xsb_index),
+            ("电院团委重要通知", self.parse_seiee_xsb_index)
         ]
 
         # read site table name from config
