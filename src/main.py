@@ -1,8 +1,11 @@
+"""Combine crawling and mailing part together."""
+
 from crawling import run_spider
 from mailing import send_mails
 
 
 def main():
+    """Main procedure."""
     run_spider()
     send_mails()
 
