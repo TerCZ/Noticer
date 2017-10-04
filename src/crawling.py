@@ -70,6 +70,8 @@ class BasicSpider(scrapy.Spider):
                     url=site_url_mapping[site_name], callback=parser
                 )
                 request.meta["site_name"] = site_name
+                request.meta["proxy"] = \
+                    "http://T.Chuzhe:TangCZ1996731TCZ@inproxy.sjtu.edu.cn:80"
                 yield request
             else:
                 self.logger.warning(
